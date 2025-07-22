@@ -7,7 +7,7 @@ from habits.views import HabitViewSet
 app_name = HabitsConfig.name
 
 router = SimpleRouter()
-router.register("",HabitViewSet)
+router.register("", HabitViewSet)
 
 urlpatterns = []
 urlpatterns += router.urls
