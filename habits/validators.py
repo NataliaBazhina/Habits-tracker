@@ -13,7 +13,9 @@ def validate_nice_habit(habit):
         if habit.reward:
             raise ValidationError("Приятная привычка не может иметь награду.")
         if habit.related_habit:
-            raise ValidationError("Приятная привычка не может иметь связанную привычку.")
+            raise ValidationError(
+                "Приятная привычка не может иметь связанную привычку."
+            )
 
 
 def validate_related_habit_is_nice(habit):
