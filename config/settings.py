@@ -27,6 +27,7 @@ INSTALLED_APPS = [
     "habits",
     "drf_yasg",
     "corsheaders",
+    "django_celery_beat",
 ]
 
 MIDDLEWARE = [
@@ -38,7 +39,6 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-
 ]
 
 ROOT_URLCONF = "config.urls"
@@ -107,11 +107,11 @@ SIMPLE_JWT = {
 
 LANGUAGE_CODE = "en-us"
 
-TIME_ZONE = "UTC"
+TIME_ZONE = 'Europe/Moscow'
+USE_TZ = True
 
 USE_I18N = True
 
-USE_TZ = True
 
 
 STATIC_URL = "static/"
@@ -123,6 +123,21 @@ MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-
-
 CORS_ALLOW_ALL_ORIGINS = True
+
+CELERY_TIMEZONE = TIME_ZONE
+CELERY_TASK_TRACK_STARTED = True
+CELERY_TASK_TIME_LIMIT = 30 * 60
+CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL")
+CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND")
+
+CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
+CELERY_BEAT_SCHEDULE = {
+    "send_habbit_reminder": {
+        "task": "habits.tasks.send_habbit_reminder",
+        "schedule": timedelta(minutes=1),
+    },
+}
+
+TELEGRAM_URL = "https://api.telegram.org/bot"
+TELEGRAM_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
