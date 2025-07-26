@@ -1,12 +1,10 @@
 from rest_framework.serializers import ModelSerializer
+
 from habits.models import Habit
-from habits.validators import (
-    validate_reward_and_related_habit,
-    validate_nice_habit,
-    validate_execution_time,
-    validate_periodicity,
-    validate_related_habit_is_nice,
-)
+from habits.validators import (validate_execution_time, validate_nice_habit,
+                               validate_periodicity,
+                               validate_related_habit_is_nice,
+                               validate_reward_and_related_habit)
 
 
 class HabitSerializer(ModelSerializer):
