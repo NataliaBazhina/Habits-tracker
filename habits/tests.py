@@ -1,13 +1,14 @@
 from datetime import time
-
 from django.test import TestCase
 from rest_framework.exceptions import ValidationError
-
 from habits.models import Habit
-from habits.validators import (validate_execution_time, validate_nice_habit,
-                               validate_periodicity,
-                               validate_related_habit_is_nice,
-                               validate_reward_and_related_habit)
+from habits.validators import (
+    RewardAndRelatedHabitValidator,
+    NiceHabitValidator,
+    RelatedHabitIsNiceValidator,
+    ExecutionTimeValidator,
+    PeriodicityValidator,
+)
 from users.models import User
 
 
@@ -37,136 +38,125 @@ class HabitValidatorsTests(TestCase):
             periodicity=2,
         )
 
-    def test_validate_reward_and_related_habit(self):
-        """Тест валидации одновременного указания награды
-        и связанной привычки.
-        """
-        habit = Habit(
-            user=self.user,
-            place="Парк",
-            time=time(7, 0),
-            action="бегать",
-            reward="шоколадка",
-            related_habit=self.nice_habit,
-            execution_time=60,
-            periodicity=1,
-        )
+    def test_reward_and_related_habit_validator(self):
+        """Тест валидации одновременного указания награды и связанной привычки."""
+        validator = RewardAndRelatedHabitValidator()
+        data = {"reward": "шоколадка", "related_habit": self.nice_habit.id}
 
         with self.assertRaises(ValidationError) as context:
-            validate_reward_and_related_habit(habit)
+            validator(data)
 
         self.assertEqual(
             str(context.exception.detail[0]),
-            "Нельзя указывать и награду, и связанную приятную привычку.",
+            "Нельзя указывать одновременно вознаграждение и связанную привычку",
         )
 
-    def test_validate_nice_habit_with_reward(self):
+    def test_nice_habit_validator_with_reward(self):
         """Тест валидации приятной привычки с наградой"""
-        habit = Habit(
-            user=self.user,
-            place="Кровать",
-            time=time(23, 0),
-            action="читать книгу",
-            nice_habit=True,
-            reward="чай",
-            execution_time=300,
-            periodicity=1,
-        )
+        validator = NiceHabitValidator()
+        data = {"nice_habit": True, "reward": "чай"}
 
         with self.assertRaises(ValidationError) as context:
-            validate_nice_habit(habit)
+            validator(data)
 
         self.assertEqual(
-            str(context.exception.detail[0]),
-            "Приятная привычка не может иметь награду.",
+            str(context.exception.detail[0]), "Приятная привычка не может иметь награду"
         )
 
-    def test_validate_nice_habit_with_related_habit(self):
+    def test_nice_habit_validator_with_related_habit(self):
         """Тест валидации приятной привычки со связанной привычкой"""
-        habit = Habit(
-            user=self.user,
-            place="Кухня",
-            time=time(9, 0),
-            action="завтракать",
-            nice_habit=True,
-            related_habit=self.regular_habit,
-            execution_time=600,
-            periodicity=1,
-        )
+        validator = NiceHabitValidator()
+        data = {"nice_habit": True, "related_habit": self.regular_habit.id}
 
         with self.assertRaises(ValidationError) as context:
-            validate_nice_habit(habit)
+            validator(data)
 
         self.assertEqual(
             str(context.exception.detail[0]),
-            "Приятная привычка не может иметь связанную привычку.",
+            "Приятная привычка не может быть связанной",
         )
 
-    def test_validate_related_habit_is_nice(self):
+    def test_related_habit_is_nice_validator(self):
         """Тест валидации что связанная привычка является приятной"""
-        habit = Habit(
-            user=self.user,
-            place="Офис",
-            time=time(13, 0),
-            action="гулять",
-            related_habit=self.regular_habit,
-            execution_time=120,
-            periodicity=1,
-        )
+        validator = RelatedHabitIsNiceValidator()
+        data = {"related_habit": self.regular_habit}
 
         with self.assertRaises(ValidationError) as context:
-            validate_related_habit_is_nice(habit)
+            validator(data)
 
         self.assertEqual(
             str(context.exception.detail[0]), "Связанная привычка должна быть приятной"
         )
 
-    def test_validate_execution_time_too_long(self):
+    def test_execution_time_validator(self):
         """Тест валидации времени выполнения привычки"""
+        validator = ExecutionTimeValidator()
+
         with self.assertRaises(ValidationError) as context:
-            validate_execution_time(121)
+            validator(121)
 
         self.assertEqual(
             str(context.exception.detail[0]),
             "Время выполнения не должно превышать 120 секунд.",
         )
 
-    def test_validate_periodicity_too_small(self):
+    def test_periodicity_validator_too_small(self):
         """Тест валидации слишком маленькой периодичности"""
+        validator = PeriodicityValidator()
+
         with self.assertRaises(ValidationError) as context:
-            validate_periodicity(0)
+            validator(0)
 
         self.assertEqual(
             str(context.exception.detail[0]),
-            "Привычка должна выполняться хотя бы 1 раз в день."
-            " Укажите значение от 1 до 7.",
+            "Привычка должна выполняться хотя бы 1 раз в день. Укажите значение от 1 до 7.",
         )
 
-    def test_validate_periodicity_too_large(self):
+    def test_periodicity_validator_too_large(self):
         """Тест валидации слишком большой периодичности"""
+        validator = PeriodicityValidator()
+
         with self.assertRaises(ValidationError) as context:
-            validate_periodicity(8)
+            validator(8)
 
         self.assertEqual(
             str(context.exception.detail[0]),
-            "Привычка не может выполняться реже чем 1 раз в 7 дней. "
-            "Максимальная периодичность - 7 дней.",
+            "Привычка не может выполняться реже чем 1 раз в 7 дней. Максимальная периодичность - 7 дней.",
         )
 
     def test_valid_habit_passes_all_validations(self):
         """Тест что корректная привычка проходит все валидации"""
-        habit = Habit(
-            user=self.user,
-            place="Балкон",
-            time=time(7, 30),
-            action="дышать свежим воздухом",
-            reward="кофе",
-            execution_time=60,
-            periodicity=1,
-        )
+        # Тест для полезной привычки с наградой
+        data_with_reward = {
+            "user": self.user.id,
+            "place": "Балкон",
+            "time": "07:30:00",
+            "action": "дышать свежим воздухом",
+            "nice_habit": False,
+            "reward": "кофе",
+            "execution_time": 60,
+            "periodicity": 1,
+        }
 
-        validate_reward_and_related_habit(habit)
-        validate_nice_habit(habit)
-        validate_related_habit_is_nice(habit)
-        validate_execution_time(habit.execution_time)
-        validate_periodicity(habit.periodicity)
+        # Тест для полезной привычки со связанной привычкой
+        data_with_related = {
+            "user": self.user.id,
+            "place": "Балкон",
+            "time": "07:30:00",
+            "action": "дышать свежим воздухом",
+            "nice_habit": False,
+            "related_habit": self.nice_habit.id,
+            "execution_time": 60,
+            "periodicity": 1,
+        }
+
+        RewardAndRelatedHabitValidator()(data_with_reward)
+        NiceHabitValidator()(data_with_reward)
+        ExecutionTimeValidator()(data_with_reward["execution_time"])
+        PeriodicityValidator()(data_with_reward["periodicity"])
+
+        RewardAndRelatedHabitValidator()(data_with_related)
+        NiceHabitValidator()(data_with_related)
+        RelatedHabitIsNiceValidator()({"related_habit": self.nice_habit})
+        ExecutionTimeValidator()(data_with_related["execution_time"])
+        PeriodicityValidator()(data_with_related["periodicity"])

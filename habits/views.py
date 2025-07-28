@@ -1,39 +1,34 @@
+from django.db.models import Q
+from rest_framework import viewsets
 from rest_framework.generics import ListAPIView
-from rest_framework.permissions import AllowAny, IsAuthenticated
-from rest_framework.viewsets import ModelViewSet
+from rest_framework.permissions import IsAuthenticated, AllowAny
 
 from habits.models import Habit
 from habits.paginations import HabitPagination
 from habits.serializers import HabitSerializer
-from users.permissions import IsOwner
+from users.permissions import HabitPermission
 
 
-class HabitViewSet(ModelViewSet):
-    """
-    ViewSet для работы с привычками пользователя.
-    Все операции доступны только для аутентифицированных пользователей.
-    Пользователь видит и может изменять только свои привычки.
-    """
+class HabitViewSet(viewsets.ModelViewSet):
+    """ViewSet для работы с привычками"""
 
-    queryset = Habit.objects.all()
     serializer_class = HabitSerializer
-    permission_classes = [IsAuthenticated, IsOwner]
+    permission_classes = [IsAuthenticated, HabitPermission]
     pagination_class = HabitPagination
 
     def get_queryset(self):
-        """Возвращает привычки текущего пользователя"""
-        return super().get_queryset().filter(user=self.request.user)
+        """Возвращает привычки текущего пользователя и публичные привычки"""
+        return Habit.objects.filter(
+            Q(user=self.request.user) | Q(public_habit=True)
+        ).order_by("id")
 
     def perform_create(self, serializer):
-        """Создает новую привычку, автоматически
-        привязывая ее к текущему пользователю.
-        """
-
+        """Создает привычку, привязывая к текущему пользователю"""
         serializer.save(user=self.request.user)
 
 
 class PublicHabitListAPIView(ListAPIView):
-    """Список публичных привычек (read-only)"""
+    """API для получения списка публичных привычек"""
 
     queryset = Habit.objects.filter(public_habit=True)
     serializer_class = HabitSerializer

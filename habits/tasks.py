@@ -17,4 +17,9 @@ def send_habbit_reminder():
             habit.action} в {
             habit.time.strftime('%H:%M')} на {
             habit.place}"
+        if habit.reward:
+            message += f"\n🏆 После выполнения получи: {habit.reward}"
+        elif habit.related_habit:
+            message += f"\n🌸 Затем сделай: {habit.related_habit.action}"
+
         send_telegram_message(habit.user.tg_chat_id, message)

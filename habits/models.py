@@ -31,6 +31,7 @@ class Habit(models.Model):
         verbose_name="связанная привычка",
         null=True,
         blank=True,
+        limit_choices_to={"nice_habit": True},
     )
 
     reward = models.CharField(
