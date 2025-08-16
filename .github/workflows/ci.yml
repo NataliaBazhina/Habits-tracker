@@ -115,20 +115,16 @@ jobs:
 
       - name: Deploy with Docker Compose
         run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
-            # Pull new images
-            echo ${{ secrets.DOCKER_HUB_TOKEN }} | docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} --password-stdin
-            docker compose pull
+          scp -o StrictHostKeyChecking=no docker-compose.yml ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }}:/home/${{ secrets.SSH_USER }}/
+          scp -o StrictHostKeyChecking=no .env ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }}:/home/${{ secrets.SSH_USER }}/
 
-            # Stop and remove old containers
-            docker compose down || true
-
-            # Start new containers
-            docker compose up -d
-
-            # Run migrations
-            docker compose exec web python manage.py migrate
-
-            # Collect static files
+          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} "
+            cd /home/${{ secrets.SSH_USER }} &&
+            echo ${{ secrets.DOCKER_HUB_TOKEN }} | docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} --password-stdin &&
+            docker compose pull &&
+            docker compose down || true &&
+            docker compose up -d &&
+            sleep 10 && 
+            docker compose exec web python manage.py migrate &&
             docker compose exec web python manage.py collectstatic --noinput
-          EOF
+          "
