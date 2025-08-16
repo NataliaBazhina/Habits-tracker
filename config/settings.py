@@ -163,3 +163,7 @@ if 'test' in sys.argv:
             'NAME': BASE_DIR / 'test_db.sqlite3',
         }
     }
+    STATICFILES_DIRS = []
+
+    TEST_RUNNER = 'django.test.runner.DiscoverRunner'
+    TEST_DISCOVERY_ROOT = BASE_DIR
