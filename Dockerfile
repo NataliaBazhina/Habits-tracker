@@ -24,10 +24,10 @@ ENV CELERY_BROKER_URL="redis://localhost:6379"
 ENV CELERY_BACKEND="redis://localhost:6379"
 
 
-RUN mkdir -p /app/media
+RUN mkdir -p /app/static /app/media
 
 
 EXPOSE 8000
 
 
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "4", "config.wsgi:application"]
