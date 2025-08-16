@@ -11,6 +11,7 @@ django-celery-beat==2.8.1
 flake8==7.3.0
 gunicorn
 django-redis
+requests==2.31.0
 
 
 
