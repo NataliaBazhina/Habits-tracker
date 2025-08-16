@@ -19,7 +19,6 @@ class Command(BaseCommand):
 
         self.stdout.write(
             self.style.SUCCESS(
-                f"Сообщение отправлено пользователю {
-                    user.email}"
+                f"Сообщение отправлено пользователю {user.email}"
             )
         )
