@@ -83,8 +83,8 @@ jobs:
 
       - name: Build and push images
         run: |
-          docker compose -f docker-compose.build.yml build
-          docker compose -f docker-compose.build.yml push
+          docker compose -f docker-compose.yml build
+          docker compose -f docker-compose.yml push
 
   deploy:
     needs: build
