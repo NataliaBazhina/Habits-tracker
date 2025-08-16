@@ -4,9 +4,7 @@ from rest_framework import status
 from rest_framework.test import APIClient
 from users.models import User
 from habits.models import Habit
-from django.test import TestCase
 from unittest.mock import patch, MagicMock
-from users.models import User
 from habits.services import send_telegram_message
 
 
@@ -121,6 +119,7 @@ class HabitPermissionTests(TestCase):
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
+
 class TelegramServiceTest(TestCase):
     """Тесты для отправки Telegram-сообщений"""
 
@@ -165,4 +164,3 @@ class TelegramServiceTest(TestCase):
         send_telegram_message(None, "Сообщение")
 
         mock_post.assert_called_once()
-
