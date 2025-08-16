@@ -24,7 +24,7 @@ ENV CELERY_BROKER_URL="redis://localhost:6379"
 ENV CELERY_BACKEND="redis://localhost:6379"
 
 
-RUN mkdir -p /app/static /app/media
+RUN mkdir -p /app/static /app/staticfiles /app/media
 
 
 EXPOSE 8000
