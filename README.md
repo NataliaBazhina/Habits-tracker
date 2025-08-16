@@ -1,70 +1,63 @@
 # Habits-Tracker
 
-Бэкенд SPA приложения для формирования полезных привычек по методике Джеймса Клира с полной Docker-поддержкой
-📌 Возможности
+🚀 Приложение для формирования полезных привычек по методике Джеймса Клира с полной Docker-поддержкой и Telegram-интеграцией.
 
-✔️ Готовая Docker-сборка (PostgreSQL + Redis + Celery)
-✔️ Автоматические миграции при запуске
-✔️ JWT-аутентификация через DRF
-✔️ Telegram-ботам (Celery Beat + Redis)
-✔️ Swagger/ReDoc документация
-✔️ 100% PEP8 (flake8) + 83% тестов 
+📌 🔧 Технологии
 
----
+    Backend: Django + DRF
 
-🚀 Запуск через Docker (рекомендуется)
-1. Настройка окружения 
+    База данных: PostgreSQL
 
-bash
+    Кеширование/очереди: Redis + Celery
+
+    Веб-сервер: Nginx
+
+    Контейнеризация: Docker + Docker Compose
+
+    CI/CD: GitHub Actions (тесты, линтинг, деплой)
+
+    Документация: Swagger/ReDoc
+
+    Тестирование: 83% coverage, 100% PEP8 (flake8)
+
+🚀 Быстрый старт (Docker)
+1. Клонирование репозитория
 
 git clone git@github.com:NataliaBazhina/Habits-tracker.git
+
 cd Habits-tracker
 
-2. Создайте .env файл:
-ini
+2. Настройка окружения
 
-PostgreSQL
+Создайте .env файл на основе .env.example:
 
 POSTGRES_DB=habits
 POSTGRES_USER=NataliaBazhina
 POSTGRES_PASSWORD=your_strong_password
 
-Django
-
 SECRET_KEY=your_django_secret_key
-DEBUG=False
-ALLOWED_HOSTS=localhost,127.0.0.1
-
-Celery
 
 CELERY_BROKER_URL=redis://redis:6379/0
-
-Telegram
 
 TELEGRAM_BOT_TOKEN=your_bot_token
 
 3. Запуск системы
 
-bash
-
 docker compose up -d --build
 
 4. Полезные команды:
 
-    Проверить логи:
-    bash
+Проверить логи:
 
 docker compose logs -f web
 
 Создать суперпользователя:
-bash
 
 docker compose exec web python manage.py csu
 
 Остановить:
-bash
 
-    docker compose down
+docker compose down
 
 🌐 Доступные эндпоинты
 
@@ -209,6 +202,23 @@ POST /users/login/
 
 Публичные привычки:
 GET /habits/public/
+
+
+⚙️ CI/CD (GitHub Actions)
+
+    Линтинг: Flake8
+
+    Тесты: Django Tests (SQLite)
+
+    Сборка: Docker-образы
+
+    Деплой: Автоматический на сервер через SSH
+
+📄 Документация
+
+    Swagger: http://localhost:8000/swagger/
+
+    ReDoc: http://localhost:8000/redoc/
 
 
 
