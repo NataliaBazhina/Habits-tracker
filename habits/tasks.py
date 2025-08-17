@@ -13,10 +13,7 @@ def send_habbit_reminder():
     print(f"Найдено привычек: {habits.count()}")
 
     for habit in habits:
-        message = f"🔔 Напоминание: {
-            habit.action} в {
-            habit.time.strftime('%H:%M')} на {
-            habit.place}"
+        message = f"🔔 Напоминание: {habit.action} в {habit.time.strftime('%H:%M')} на {habit.place}"
         if habit.reward:
             message += f"\n🏆 После выполнения получи: {habit.reward}"
         elif habit.related_habit:
